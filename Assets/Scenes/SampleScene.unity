@@ -574,9 +574,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BranchGenerator
   target: {fileID: 1533088794}
-  attractorAmount: 160
+  attractorAmount: 627
   killRadius: 0.1
-  attractionRadius: 0.1
+  attractionRadius: 0.03
   offsetDistance: 0.1
 --- !u!4 &1067053410
 Transform:
@@ -587,7 +587,7 @@ Transform:
   m_GameObject: {fileID: 1067053408}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.643, y: 0.823, z: 0.19711}
+  m_LocalPosition: {x: 0.624, y: 0.495, z: 0.19711}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

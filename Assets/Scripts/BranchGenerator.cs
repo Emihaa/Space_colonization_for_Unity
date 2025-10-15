@@ -31,7 +31,7 @@ public class BranchGenerator : MonoBehaviour
     public GameObject target;
     public int attractorAmount = 500;
     public float killRadius = 0.1f;
-    public float attractionRadius = 0.1f;
+    public float attractionRadius = 0.01f;
     public float offsetDistance = 0.05f;
 
     private List<Vector3> attractorPoints = new List<Vector3>();
@@ -116,14 +116,59 @@ public class BranchGenerator : MonoBehaviour
         return (newNode);
     }
 
+    /* 
+        https://algorithmicbotany.org/papers/colonization.egwnp2007.large.pdf
+
+        The tree is generated iteratively. In each iteration, an attraction point may influence the tree node that is closest to it. This influence occurs if the distance between the point and the closest node is less then a radius of influence di.
+        There may be several attraction points that influence a single tree node v: we denote this set of points by S(v). If S(v) is not empty, a new tree node v will be created and attached to v by segment (vv). 
+        The node v is positioned at a distance D from v, in the direction defined as the average of the normalized vectors toward all the sources s S(v).
+
+    */
     private void createNodes ()
     {
         Transform t = this.transform;
         nodesList.Clear();
-        
-        // root node just starts from the origin point of the object it is attached to 
-        nodesList.Add(addNode(t.position, null, null, 0));
 
+        Node rootNode = addNode(t.position, null, null, 0);
+        nodesList.Add(rootNode);
+
+        // first check if in the radius of each node there is an attractor/s
+        // each attractor that is within the radius will be used to calculate new vector for the direction of new node
+        // if there are attractors that are within a killzone of the new node then destroy them
+        // if there are no attractors just go towards the previous nodes dir?
+        Node currentNode = rootNode;
+        List<Vector3> points = new List<Vector3>();
+        for (int i = 0; i < 1 ; i++)
+        {
+            points.Clear();
+            foreach (var point in attractorPoints)
+            {
+                if ((currentNode._pos - point).sqrMagnitude < attractionRadius)
+                {
+                    Debug.Log(point);
+                    points.Add(point);
+                } 
+            }
+            if (points.Count != 0)
+            {
+                // the new position of new node should also be by the world pos
+                Vector3 dist = new Vector3(0, 0, 0);
+                foreach(var point in points) 
+                {
+                    dist += (point - currentNode._pos).normalized;
+                }
+                dist /= points.Count;
+                dist.Normalize();
+                Debug.Log("distance:" + dist);
+                dist = currentNode._pos + dist * 0.15f;
+                Node newNode = addNode(dist, currentNode, null, i);
+                currentNode._next = newNode;
+                nodesList.Add(newNode);
+            }
+            if (currentNode._next == null)
+                break ;
+            currentNode = currentNode._next;
+        }
     }
 
 
