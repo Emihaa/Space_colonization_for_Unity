@@ -103,7 +103,6 @@ public class BranchGenerator : MonoBehaviour
                 }
             }
         }
-        createNodes();
     }
 
     private Node addNode (Vector3 pos, Node prevNode, Node nextNode, int index)
@@ -143,10 +142,16 @@ public class BranchGenerator : MonoBehaviour
             points.Clear();
             foreach (var point in attractorPoints)
             {
-                if ((currentNode._pos - point).sqrMagnitude < attractionRadius)
+                float temp = (currentNode._pos - point).sqrMagnitude;
+                if (temp < attractionRadius)
                 {
-                    Debug.Log(point);
-                    points.Add(point);
+                    foreach (var node in nodesList) // each attraction point should only affect one node, the one that is closest to them
+                    {
+                        if ((node._pos - point).sqrMagnitude < temp) // if any of the distances are shorter than the temp then we dont add it to our list
+                            continue ;
+                        Debug.Log(point);
+                        points.Add(point);
+                    }
                 } 
             }
             if (points.Count != 0)
@@ -196,7 +201,8 @@ public class BranchGenerator : MonoBehaviour
     // Not so lightweight
     private void OnValidate() 
     {
-        GenerateAttractors();    
+        GenerateAttractors();
+        createNodes();
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
