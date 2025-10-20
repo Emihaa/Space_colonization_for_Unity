@@ -580,9 +580,6 @@ MonoBehaviour:
   attractionRadius: 0.4
   offsetDistance: 0.1
   branchLen: 0.05
-  showAttractionRadius: 0
-  showKillRadius: 0
-  showLines: 1
 --- !u!4 &1067053410
 Transform:
   m_ObjectHideFlags: 0

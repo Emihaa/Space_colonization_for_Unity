@@ -24,6 +24,7 @@ public static class BranchUtils
     */
 
     // Generate random pos inside given triangle and return that
+    // barycentric coordinates
     public static Vector3 RandomPosOnTriangle(Vector3 v0, Vector3 v1, Vector3 v2)
     {
         float u = Random.value;

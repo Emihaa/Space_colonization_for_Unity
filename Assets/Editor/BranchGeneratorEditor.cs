@@ -13,6 +13,13 @@ public class BranchGeneratorEditor : Editor {
         // Reference to the actual target component
         BranchGenerator generator = (BranchGenerator)target;
 
+        generator.showAttractionRadius = EditorGUILayout.Toggle("Show Attraction Radius", generator.showAttractionRadius);
+        generator.showKillRadius = EditorGUILayout.Toggle("Show Kill Radius", generator.showKillRadius);
+        generator.showLines = EditorGUILayout.Toggle("Show Lines", generator.showLines);
+
+        if (GUI.changed)
+            SceneView.RepaintAll(); // refresh gizmos immediately
+
         // Add a button
         if (GUILayout.Button("Generate Branches"))
         {
