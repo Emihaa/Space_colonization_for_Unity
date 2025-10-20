@@ -14,9 +14,9 @@ public class BranchGeneratorEditor : Editor {
         BranchGenerator generator = (BranchGenerator)target;
 
         // Add a button
-        if (GUILayout.Button("Generate Attractors"))
+        if (GUILayout.Button("Generate Branches"))
         {
-            generator.GenerateAttractors();
+            generator.SpaceColonization();
 
             // Mark scene dirty so Unity knows something changed
             EditorUtility.SetDirty(generator);
