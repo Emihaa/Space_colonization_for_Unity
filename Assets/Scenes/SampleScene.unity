@@ -581,7 +581,7 @@ MonoBehaviour:
   attractionRadius: 0.4
   offsetDistance: 0.1
   branchLen: 0.05
-  sunEffect: 1
+  sunEffect: 0
 --- !u!4 &1067053410
 Transform:
   m_ObjectHideFlags: 0
