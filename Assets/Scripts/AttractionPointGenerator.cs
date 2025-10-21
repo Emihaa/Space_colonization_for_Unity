@@ -3,16 +3,16 @@ using System.Collections.Generic;
 
 public class AttractionPointGenerator
 {
-    private GameObject      target;
-    private GameObject      sun;
-    private int             attractorAmount;
-    private float           offsetDistance;
-    private bool            sunEffect;
-    private List<Vector3>   attractorPoints;
+    private List<GameObject>    targets;
+    private GameObject          sun;
+    private int                 attractorAmount;
+    private float               offsetDistance;
+    private bool                sunEffect;
+    private List<Vector3>       attractorPoints;
 
-    public AttractionPointGenerator(GameObject target, GameObject sun, int attractorAmount, float offsetDistance, bool sunEffect, List<Vector3> attractorPoints)
+    public AttractionPointGenerator(List<GameObject> targets, GameObject sun, int attractorAmount, float offsetDistance, bool sunEffect, List<Vector3> attractorPoints)
     {
-        this.target             = target;
+        this.targets            = targets;
         this.sun                = sun;
         this.attractorAmount    = attractorAmount;
         this.offsetDistance     = offsetDistance;
@@ -79,11 +79,10 @@ public class AttractionPointGenerator
         return (triIndex);
     }
 
-    private void PlacePoint(List<float> triangleAreas, ref float totalArea, Vector3[] normals, Vector3[] vertices, int[] triangles)
+    private void PlacePoint(GameObject target, List<float> triangleAreas, ref float totalArea, Vector3[] normals, Vector3[] vertices, int[] triangles)
     {
         Transform t = target.transform;
-
-        while (attractorPoints.Count < attractorAmount)
+        for(int i = 0; i < attractorAmount; i++)
         {
             int triIndex = PickArea(triangleAreas, totalArea);
 
@@ -132,16 +131,20 @@ public class AttractionPointGenerator
 
     public void GenerateAttractors()
     {
-        Mesh mesh = target.GetComponent<MeshFilter>().sharedMesh;
-        Vector3[] vertices = mesh.vertices;
-        int[] triangles = mesh.triangles;
-        Vector3[] normals = mesh.normals;
-
         attractorPoints.Clear();
-        List<float> triangleAreas = new List<float>();
-        float totalArea = 0f; // can we reach max float val? maybe we need to have larger val than float or check for overflow
+        attractorAmount = attractorAmount / targets.Count;
+        foreach(var target in targets)
+        {
+            Mesh mesh = target.GetComponent<MeshFilter>().sharedMesh;
+            Vector3[] vertices = mesh.vertices;
+            int[] triangles = mesh.triangles;
+            Vector3[] normals = mesh.normals;
 
-        WeightAreas(triangleAreas, ref totalArea, normals, vertices, triangles);
-        PlacePoint(triangleAreas, ref totalArea, normals, vertices, triangles);
+            List<float> triangleAreas = new List<float>();
+            float totalArea = 0f; // can we reach max float val? maybe we need to have larger val than float or check for overflow
+
+            WeightAreas(triangleAreas, ref totalArea, normals, vertices, triangles);
+            PlacePoint(target, triangleAreas, ref totalArea, normals, vertices, triangles);
+        }
     }
 }

@@ -5,22 +5,22 @@ using System.Collections.Generic;
 
 public class BranchGenerator : MonoBehaviour
 {
-    public GameObject   target;
-    public GameObject   sun;
-    public int          grow                    = 10;
-    public int          attractorAmount         = 500;
-    public float        killRadius              = 0.2f;
-    public float        attractionRadius        = 0.4f;
-    public float        offsetDistance          = 0.1f;
-    public float        branchLen               = 0.05f;
+    public  GameObject          sun;
+    public  int                 grow                = 10;
+    public  int                 attractorAmount     = 500;
+    public  float               killRadius          = 0.2f;
+    public  float               attractionRadius    = 0.4f;
+    public  float               offsetDistance      = 0.1f;
+    public  float               branchLen           = 0.05f;
     
     [System.NonSerialized] public bool  showAttractionRadius    = false;
     [System.NonSerialized] public bool  showKillRadius          = false;
     [System.NonSerialized] public bool  showLines               = false;
     public bool                         sunEffect               = false;                     
 
-    private List<Vector3>   attractorPoints     = new List<Vector3>();
-    private List<Node>      nodesList           = new List<Node>();
+    private List<GameObject>    targets             = new List<GameObject>();
+    private List<Vector3>       attractorPoints     = new List<Vector3>();
+    private List<Node>          nodesList           = new List<Node>();
 
     private AttractionPointGenerator    attGen;
     private NodeGenerator               nodesGen;
@@ -57,19 +57,32 @@ public class BranchGenerator : MonoBehaviour
         }
     }
 
+    private bool FindTargets()
+    {
+        Transform parent = this.transform;
+        targets.Clear();
+        foreach (Transform child in parent)
+        {
+            targets.Add(child.gameObject);
+        }
+        if (targets.Count > 0)
+            return (true);
+        return (false);
+    }
+
     public void SpaceColonization()
     {
-        if (target != null)
+        if (FindTargets())
         {
             nodesList.Clear();
-            attGen = new AttractionPointGenerator(target, sun, attractorAmount, offsetDistance, sunEffect, attractorPoints);
+            attGen = new AttractionPointGenerator(targets, sun, attractorAmount, offsetDistance, sunEffect, attractorPoints);
             attGen.GenerateAttractors();
             nodesGen = new NodeGenerator(this.transform, grow, killRadius, attractionRadius, branchLen, attractorPoints);
             nodesList = nodesGen.CreateNodes();
         }
         else
         {
-            Debug.Log("Add Target");
+            Debug.Log("No target(s) found, add them as children of the PlantGenerator object");
             attractorPoints.Clear();
             nodesList.Clear();
         }
