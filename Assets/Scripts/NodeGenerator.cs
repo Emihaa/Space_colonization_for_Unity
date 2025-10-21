@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 public class NodeGenerator
 {
-    Transform              obj;
+    Transform               obj;
     private int             grow;
     private float           killRadius;
     private float           attractionRadius;
@@ -19,6 +19,18 @@ public class NodeGenerator
         this.attractionRadius   = attractionRadius;
         this.branchLen          = branchLen;
         this.attractorPoints    = attractorPoints;
+    }
+
+    // creates a new Node of each branch and connects it to the correct counterpart
+    // not so sure of these yet
+    private Node NewNode (Vector3 pos, Node nextNode, Node prevNode, int index)
+    {
+        Node newNode = new Node(pos);
+        newNode._next = nextNode;
+        newNode._prev = prevNode;
+        newNode._index = index;
+
+        return (newNode);
     }
 
     private void SearchAttractorPoints()
@@ -65,7 +77,7 @@ public class NodeGenerator
                     if ((point - pos).magnitude <= killRadius)
                         attractorPoints.Remove(point);
                 }
-                Node newNode = BranchUtils.NewNode(pos, node, prevNode, index);
+                Node newNode = NewNode(pos, node, prevNode, index);
                 nodesList.Add(newNode);
                 node._attractors.Clear();
                 grow = true;
@@ -77,7 +89,7 @@ public class NodeGenerator
 
     public List<Node> CreateNodes ()
     {
-        Node rootNode = BranchUtils.NewNode(obj.position , null, null, 0);
+        Node rootNode = NewNode(obj.position , null, null, 0);
         nodesList.Add(rootNode);
         for (int i = 0; i < grow; i++)
         {

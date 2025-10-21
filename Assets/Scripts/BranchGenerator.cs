@@ -22,6 +22,9 @@ public class BranchGenerator : MonoBehaviour
     private List<Vector3>   attractorPoints     = new List<Vector3>();
     private List<Node>      nodesList           = new List<Node>();
 
+    private AttractionPointGenerator    attGen;
+    private NodeGenerator               nodesGen;
+
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;
@@ -59,10 +62,10 @@ public class BranchGenerator : MonoBehaviour
         if (target != null)
         {
             nodesList.Clear();
-            AttractionPointGenerator generator = new AttractionPointGenerator(target, sun, attractorAmount, offsetDistance, sunEffect, attractorPoints);
-            generator.GenerateAttractors();
-            NodeGenerator nodes = new NodeGenerator(this.transform, grow, killRadius, attractionRadius, branchLen, attractorPoints);
-            nodesList = nodes.CreateNodes();
+            attGen = new AttractionPointGenerator(target, sun, attractorAmount, offsetDistance, sunEffect, attractorPoints);
+            attGen.GenerateAttractors();
+            nodesGen = new NodeGenerator(this.transform, grow, killRadius, attractionRadius, branchLen, attractorPoints);
+            nodesList = nodesGen.CreateNodes();
         }
         else
         {
