@@ -6,6 +6,7 @@ using System.Collections.Generic;
 public class BranchGenerator : MonoBehaviour
 {
     public GameObject   target;
+    public GameObject   sun;
     public int          grow                    = 10;
     public int          attractorAmount         = 500;
     public float        killRadius              = 0.2f;
@@ -16,50 +17,85 @@ public class BranchGenerator : MonoBehaviour
     [System.NonSerialized] public bool  showAttractionRadius    = false;
     [System.NonSerialized] public bool  showKillRadius          = false;
     [System.NonSerialized] public bool  showLines               = false;
+    public bool                         sunEffect               = false;                     
 
     private List<Vector3>   attractorPoints     = new List<Vector3>();
     private List<Node>      nodesList           = new List<Node>();
 
-    // things to do:
-    // generate that the attraction points will be more evenly added based on the area space
-    // give option that plants will grow based on the sun direction 
-
-    private void WeightAreas(List<float> triangleAreas, ref float totalArea, Vector3[] vertices, int[] triangles)
+    // calculates the total weight of all the triangle areas and adds each calculated area mass of each triangle to list
+    // Vector3.Cross(v1 - v0, v2- v0).magnitude * 0.5f; <- v1 -v0 = edge vector
+    // 
+    private void WeightAreas(List<float> triangleAreas, ref float totalArea, Vector3[] normals, Vector3[] vertices, int[] triangles)
     {
         int amount = triangles.Length;
-        for (int i = 0; i < amount; i += 3)
+        if (sunEffect == true && sun != null)
         {
-            Vector3 v0 = vertices[triangles[i]];
-            Vector3 v1 = vertices[triangles[i + 1]];
-            Vector3 v2 = vertices[triangles[i + 2]];
+            for (int i = 0; i < amount; i += 3)
+            {
+                Vector3 normal = (normals[triangles[i]] + normals[triangles[i + 1]] + normals[triangles[i + 2]]).normalized;
+                Vector3 sunDir = -sun.transform.forward;
+                float dot = Vector3.Dot(normal, sunDir);
+                float area = 0;
+                if (dot > 0)
+                {
+                    Vector3 v0 = vertices[triangles[i]];
+                    Vector3 v1 = vertices[triangles[i + 1]];
+                    Vector3 v2 = vertices[triangles[i + 2]];
 
-            float area = Vector3.Cross(v1 - v0, v2- v0).magnitude * 0.5f;
-            triangleAreas.Add(area);
-            totalArea += area;
+                    area = Vector3.Cross(v1 - v0, v2- v0).magnitude * 0.5f;
+                }
+                triangleAreas.Add(area);
+                totalArea += area;
+            }
+        }
+        else
+        {
+            for (int i = 0; i < amount; i += 3)
+            {
+                Vector3 v0 = vertices[triangles[i]];
+                Vector3 v1 = vertices[triangles[i + 1]];
+                Vector3 v2 = vertices[triangles[i + 2]];
+
+                float area = Vector3.Cross(v1 - v0, v2- v0).magnitude * 0.5f;
+                triangleAreas.Add(area);
+                totalArea += area;
+            }
         }
     }
 
-    //this doest work. Check it out next
-    private void PickArea(List<float> triangleAreas, ref float totalArea, Vector3[] normals, Vector3[] vertices, int[] triangles)
+
+
+    // r = randomized float from 0 to totalArea
+    // for loop to run throug the triangleArea weight list till we reach
+    // weight that is equal or more to the r value
+    // then we choose that triangle index multiply by 3 to match with the int[] triangle length
+    // because if there are 6 triangles in the mesh:
+    // triangleAreas.count is 6
+    // int[] triangle length is 18 as it holds triple the information as one triangle = 3 vertices = triangle[i] +  triangle[i + 1] + triangle[i + 2]
+    private int PickArea(List<float> triangleAreas, float totalArea)
+    {
+        int triIndex = 0;
+        float cumulative = 0f;
+        float r = Random.value * totalArea;
+        for (int i = 0; i < triangleAreas.Count; i++) 
+        {
+            cumulative += triangleAreas[i];
+            if (r <= cumulative)
+            {
+                triIndex = i * 3;
+                break ;
+            }
+        }
+        return (triIndex);
+    }
+
+    private void PlacePoint(List<float> triangleAreas, ref float totalArea, Vector3[] normals, Vector3[] vertices, int[] triangles)
     {
         Transform t = target.transform;
 
-        Debug.Log("totalarea:" + totalArea);
         while (attractorPoints.Count < attractorAmount)
         {
-            float cumulative = 0f;
-            int selectedTriangle = 0;
-            float r = Random.value * totalArea;
-            for (int i = 0; i < triangleAreas.Count; i++) 
-            {
-                cumulative += triangleAreas[i];
-                if (r <= cumulative)
-                {
-                    selectedTriangle = i;
-                    break ;
-                }
-            }
-            int triIndex = selectedTriangle * 3;
+            int triIndex = PickArea(triangleAreas, totalArea);
 
             Vector3 v0 = vertices[triangles[triIndex]];
             Vector3 v1 = vertices[triangles[triIndex + 1]];
@@ -88,8 +124,8 @@ public class BranchGenerator : MonoBehaviour
         List<float> triangleAreas = new List<float>();
         float totalArea = 0f; // can we reach max float val? maybe we need to have larger val than float or check for overflow
 
-        WeightAreas(triangleAreas, ref totalArea, vertices, triangles);
-        PickArea(triangleAreas, ref totalArea, normals, vertices, triangles);
+        WeightAreas(triangleAreas, ref totalArea, normals, vertices, triangles);
+        PlacePoint(triangleAreas, ref totalArea, normals, vertices, triangles);
 
     }
 
