@@ -8,10 +8,10 @@ public class BranchGenerator : MonoBehaviour
     public GameObject   target;
     public int          grow                    = 10;
     public int          attractorAmount         = 500;
-    public float        killRadius              = 0.01f;
-    public float        attractionRadius        = 0.1f;
-    public float        offsetDistance          = 0.05f;
-    public float        branchLen               = 0.15f;
+    public float        killRadius              = 0.2f;
+    public float        attractionRadius        = 0.4f;
+    public float        offsetDistance          = 0.1f;
+    public float        branchLen               = 0.05f;
     
     [System.NonSerialized] public bool  showAttractionRadius    = false;
     [System.NonSerialized] public bool  showKillRadius          = false;
@@ -24,7 +24,7 @@ public class BranchGenerator : MonoBehaviour
     // generate that the attraction points will be more evenly added based on the area space
     // give option that plants will grow based on the sun direction 
 
-    private void WeightAreas(List<float> triangleAreas, float totalArea, Vector3[] vertices, int[] triangles)
+    private void WeightAreas(List<float> triangleAreas, ref float totalArea, Vector3[] vertices, int[] triangles)
     {
         int amount = triangles.Length;
         for (int i = 0; i < amount; i += 3)
@@ -40,14 +40,15 @@ public class BranchGenerator : MonoBehaviour
     }
 
     //this doest work. Check it out next
-    private void PickArea(List<float> triangleAreas, float totalArea, Vector3[] normals, Vector3[] vertices, int[] triangles)
+    private void PickArea(List<float> triangleAreas, ref float totalArea, Vector3[] normals, Vector3[] vertices, int[] triangles)
     {
         Transform t = target.transform;
 
-        float cumulative = 0f;
-        int selectedTriangle = 0;
+        Debug.Log("totalarea:" + totalArea);
         while (attractorPoints.Count < attractorAmount)
         {
+            float cumulative = 0f;
+            int selectedTriangle = 0;
             float r = Random.value * totalArea;
             for (int i = 0; i < triangleAreas.Count; i++) 
             {
@@ -87,8 +88,8 @@ public class BranchGenerator : MonoBehaviour
         List<float> triangleAreas = new List<float>();
         float totalArea = 0f; // can we reach max float val? maybe we need to have larger val than float or check for overflow
 
-        WeightAreas(triangleAreas, totalArea, vertices, triangles);
-        PickArea(triangleAreas, totalArea, normals, vertices, triangles);
+        WeightAreas(triangleAreas, ref totalArea, vertices, triangles);
+        PickArea(triangleAreas, ref totalArea, normals, vertices, triangles);
 
     }
 
