@@ -22,75 +22,6 @@ public class BranchGenerator : MonoBehaviour
     private List<Vector3>   attractorPoints     = new List<Vector3>();
     private List<Node>      nodesList           = new List<Node>();
 
-    private void SearchAttractorPoints()
-    {
-        foreach (var point in attractorPoints) 
-        {
-            Node tempNode = null;
-            float tempDist = 3.40282347E+38f;
-            foreach (var node in nodesList) 
-            {
-                float dist = (node._pos - point).magnitude;
-                if (dist < attractionRadius && dist < tempDist)
-                {
-                    tempDist = dist;
-                    tempNode = node;
-                }
-            }
-            if (tempNode != null)
-                tempNode._attractors.Add(point);
-        }
-    }
-
-    private bool GenerateNewNodes(int index, Node rootNode)
-    {
-        bool grow = false;
-        Node prevNode = rootNode;
-        for (int i = 0; i < nodesList.Count; i++) 
-        {
-            Node node = nodesList[i];
-            if (node._attractors.Count != 0)
-            {
-                Vector3 pos = new Vector3(0, 0, 0);
-                foreach(var point in node._attractors) 
-                {
-                    pos += (point - node._pos).normalized;
-                }
-                pos /= node._attractors.Count;
-                pos.Normalize();
-                pos = node._pos + pos * branchLen;
-                foreach(var point in node._attractors) 
-                {
-                    if ((point - pos).magnitude <= killRadius)
-                        attractorPoints.Remove(point);
-                }
-                Node newNode = BranchUtils.NewNode(pos, node, prevNode, index);
-                nodesList.Add(newNode);
-                node._attractors.Clear();
-                grow = true;
-                prevNode = newNode;
-            }
-        }
-        return (grow);
-    } 
-
-    private void CreateNodes ()
-    {
-        nodesList.Clear();
-        Node rootNode = BranchUtils.NewNode(this.transform.position , null, null, 0);
-        nodesList.Add(rootNode);
-        for (int i = 0; i < grow; i++)
-        {
-            SearchAttractorPoints();
-            if (GenerateNewNodes(i, rootNode) == false)
-            {
-                Debug.Log("no new nodes");
-                break ;
-            }
-        }
-    }
-
-
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;
@@ -127,9 +58,11 @@ public class BranchGenerator : MonoBehaviour
     {
         if (target != null)
         {
+            nodesList.Clear();
             AttractionPointGenerator generator = new AttractionPointGenerator(target, sun, attractorAmount, offsetDistance, sunEffect, attractorPoints);
             generator.GenerateAttractors();
-            CreateNodes();
+            NodeGenerator nodes = new NodeGenerator(this.transform, grow, killRadius, attractionRadius, branchLen, attractorPoints);
+            nodesList = nodes.CreateNodes();
         }
         else
         {
