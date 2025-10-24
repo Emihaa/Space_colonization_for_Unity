@@ -16,6 +16,9 @@ public class Node
     public Node _prev;
     public Node _next;
     public int _index;
+    public GameObject _mesh;
+    public float _thickness;
+    public float _length;
     public List<Vector3> _attractors = new List<Vector3>();
 
     public Node(Vector3 pos)
@@ -24,5 +27,8 @@ public class Node
         _prev = null;
         _next = null;
         _index = 0;
+        _mesh = null;
+        _thickness = 0.05f;
+        _length = 0.1f;
     }
 }

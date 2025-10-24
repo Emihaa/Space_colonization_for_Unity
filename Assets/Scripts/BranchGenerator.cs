@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEditor;
 using System.Collections.Generic;
 
 // better generate the logic before play time and during the pay time it will grow to be
@@ -6,6 +7,8 @@ using System.Collections.Generic;
 public class BranchGenerator : MonoBehaviour
 {
     public  GameObject          sun;
+    public  GameObject          branch;
+    private GameObject          holder;
     public  int                 grow                = 10;
     public  int                 attractorAmount     = 500;
     public  float               killRadius          = 0.2f;
@@ -15,9 +18,11 @@ public class BranchGenerator : MonoBehaviour
     
     [System.NonSerialized] public bool  showAttractionRadius    = false;
     [System.NonSerialized] public bool  showKillRadius          = false;
-    [System.NonSerialized] public bool  showLines               = false;
-    public bool                         sunEffect               = false;                     
-
+    [System.NonSerialized] public bool showLines = true;
+    
+    public  bool    sunEffect       = false;
+    public  bool    instantiated    = false;
+                  
     private List<GameObject>    targets             = new List<GameObject>();
     private List<Vector3>       attractorPoints     = new List<Vector3>();
     private List<Node>          nodesList           = new List<Node>();
@@ -28,7 +33,7 @@ public class BranchGenerator : MonoBehaviour
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.yellow;
-        if (attractorPoints != null)
+        if (attractorPoints != null && instantiated != true)
         {
             foreach (var point in attractorPoints)
                 Gizmos.DrawSphere(point, 0.05f);
@@ -86,6 +91,45 @@ public class BranchGenerator : MonoBehaviour
             attractorPoints.Clear();
             nodesList.Clear();
         }
+    }
+
+    public void DeleteBranches()
+    {
+        foreach (var node in nodesList)
+        {
+            if (node._mesh != null)
+            {
+                DestroyImmediate(node._mesh);
+                node._mesh = null;
+            }
+            DestroyImmediate(holder);
+            holder = null;
+            instantiated = false;
+        }
+    }
+
+    public void GenerateBranches()
+    {
+        if (branch != null)
+        {
+            if (!holder)
+            {
+                holder = new GameObject("Branches");
+                holder.transform.position = this.transform.position;    
+            }
+            foreach (var node in nodesList)
+            {
+                node._mesh = PrefabUtility.InstantiatePrefab(branch) as GameObject;
+                node._mesh.transform.localScale = new Vector3(node._thickness, node._length/2, node._thickness);
+                node._mesh.transform.position = node._pos;
+                if (node._next != null)
+                    node._mesh.transform.rotation = Quaternion.LookRotation((node._pos - node._next._pos).normalized) * Quaternion.Euler(90, 0, 0);
+                node._mesh.transform.parent = holder.transform;
+            }
+            instantiated = true;
+        }
+        else
+            Debug.Log("No Branch prefab");
     }
 
     // Automatically updates the AttractorPoints when there are changes done to the attributes.

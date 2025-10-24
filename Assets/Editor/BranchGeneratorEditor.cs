@@ -27,6 +27,20 @@ public class BranchGeneratorEditor : Editor {
 
             // Mark scene dirty so Unity knows something changed
             EditorUtility.SetDirty(generator);
+        }
+        if (GUILayout.Button("Spawn Prefab Branches"))
+        {
+            generator.GenerateBranches();
+
+            // Mark scene dirty so Unity knows something changed
+            EditorUtility.SetDirty(generator);
+        } 
+        if (GUILayout.Button("Delete Prefab Branches"))
+        {
+            generator.DeleteBranches();
+
+            // Mark scene dirty so Unity knows something changed
+            EditorUtility.SetDirty(generator);
         }  
     }
 }

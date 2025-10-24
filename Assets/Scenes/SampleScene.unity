@@ -570,13 +570,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 410087039}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.41569522, y: 0.1633725, z: -0.076181844, w: 0.8914614}
+  m_LocalRotation: {x: 0.3306986, y: 0.56431365, z: -0.26314375, w: 0.7091855}
   m_LocalPosition: {x: 0, y: 3.807, z: -2.629}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 0}
-  m_LocalEulerAnglesHint: {x: 50, y: 20.77, z: 0}
+  m_LocalEulerAnglesHint: {x: 50, y: 77.02, z: 0}
 --- !u!114 &410087042
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -798,13 +798,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BranchGenerator
   sun: {fileID: 410087039}
-  grow: 50
-  attractorAmount: 700
-  killRadius: 0.2
+  branch: {fileID: 7643377748512475374, guid: 45fea0d599770284486b3fc394ea7be3, type: 3}
+  grow: 20
+  attractorAmount: 500
+  killRadius: 0.1
   attractionRadius: 0.4
   offsetDistance: 0.1
-  branchLen: 0.05
+  branchLen: 0.1
   sunEffect: 1
+  instantiated: 0
 --- !u!4 &1067053410
 Transform:
   m_ObjectHideFlags: 0

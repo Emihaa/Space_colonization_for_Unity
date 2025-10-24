@@ -79,7 +79,7 @@ public class AttractionPointGenerator
         return (triIndex);
     }
 
-    private void PlacePoint(GameObject target, List<float> triangleAreas, ref float totalArea, Vector3[] normals, Vector3[] vertices, int[] triangles)
+    private void PlacePoint(GameObject target, List<float> triangleAreas, float totalArea, Vector3[] normals, Vector3[] vertices, int[] triangles)
     {
         Transform t = target.transform;
         for(int i = 0; i < attractorAmount; i++)
@@ -103,7 +103,7 @@ public class AttractionPointGenerator
     // calculates the total weight of all the triangle areas and adds each calculated area mass of each triangle to list
     // Vector3.Cross(v1 - v0, v2- v0).magnitude * 0.5f; <- v1 -v0 = edge vector
     // 
-    private void WeightAreas(List<float> triangleAreas, ref float totalArea, Vector3[] normals, Vector3[] vertices, int[] triangles)
+    private float WeightAreas(List<float> triangleAreas, float totalArea, Vector3[] normals, Vector3[] vertices, int[] triangles)
     {
         int amount = triangles.Length;
         for (int i = 0; i < amount; i += 3)
@@ -127,6 +127,7 @@ public class AttractionPointGenerator
             triangleAreas.Add(area);
             totalArea += area;
         }
+        return (totalArea);
     }
 
     public void GenerateAttractors()
@@ -143,8 +144,8 @@ public class AttractionPointGenerator
             List<float> triangleAreas = new List<float>();
             float totalArea = 0f; // can we reach max float val? maybe we need to have larger val than float or check for overflow
 
-            WeightAreas(triangleAreas, ref totalArea, normals, vertices, triangles);
-            PlacePoint(target, triangleAreas, ref totalArea, normals, vertices, triangles);
+            totalArea = WeightAreas(triangleAreas, totalArea, normals, vertices, triangles);
+            PlacePoint(target, triangleAreas, totalArea, normals, vertices, triangles);
         }
     }
 }
