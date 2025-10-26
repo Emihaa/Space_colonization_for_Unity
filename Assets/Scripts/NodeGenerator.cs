@@ -61,7 +61,6 @@ public class NodeGenerator
     private bool GenerateNewNodes(ref int index, Node rootNode)
     {
         bool grow = false;
-        Node prevNode = rootNode;
         for (int i = 0; i < nodesList.Count; i++)
         {
             Node node = nodesList[i];
@@ -80,11 +79,12 @@ public class NodeGenerator
                     if ((point - pos).magnitude <= killRadius)
                         attractorPoints.Remove(point);
                 }
-                Node newNode = NewNode(pos, (node._pos - pos).normalized, node, prevNode, index);
+                Node newNode = NewNode(pos, (node._pos - pos).normalized, null, node, index);
                 nodesList.Add(newNode);
                 node._attractors.Clear();
                 grow = true;
-                prevNode = newNode;
+                if (node._next == null)
+                    node._next = newNode;
                 index++;
             }
         }
@@ -102,7 +102,7 @@ public class NodeGenerator
             if (GenerateNewNodes(ref index, rootNode) == false)
             {
                 Debug.Log("no new nodes");
-                break ;
+                break;
             }
         }
         return (nodesList);
