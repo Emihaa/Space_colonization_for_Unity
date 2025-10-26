@@ -16,6 +16,7 @@ public class BranchGeneratorEditor : Editor {
         generator.showAttractionRadius = EditorGUILayout.Toggle("Show Attraction Radius", generator.showAttractionRadius);
         generator.showKillRadius = EditorGUILayout.Toggle("Show Kill Radius", generator.showKillRadius);
         generator.showLines = EditorGUILayout.Toggle("Show Lines", generator.showLines);
+        generator.instantiated = EditorGUILayout.Toggle("Instantiated", generator.instantiated);
 
         if (GUI.changed)
             SceneView.RepaintAll(); // refresh gizmos immediately
@@ -28,7 +29,7 @@ public class BranchGeneratorEditor : Editor {
             // Mark scene dirty so Unity knows something changed
             EditorUtility.SetDirty(generator);
         }
-        if (GUILayout.Button("Spawn Prefab Branches"))
+        if (GUILayout.Button("Spawn Branches"))
         {
             generator.GenerateBranches();
 

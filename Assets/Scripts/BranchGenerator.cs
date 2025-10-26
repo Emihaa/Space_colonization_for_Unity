@@ -7,27 +7,32 @@ using System.Collections.Generic;
 public class BranchGenerator : MonoBehaviour
 {
     public  GameObject          sun;
-    public  GameObject          branch;
     private GameObject          holder;
+    public Material             branchMat;
+    private Mesh                mesh;
     public  int                 grow                = 10;
     public  int                 attractorAmount     = 500;
     public  float               killRadius          = 0.2f;
     public  float               attractionRadius    = 0.4f;
     public  float               offsetDistance      = 0.1f;
     public  float               branchLen           = 0.05f;
+    private readonly float      maxThickness        = 0.05f;
     
     [System.NonSerialized] public bool  showAttractionRadius    = false;
     [System.NonSerialized] public bool  showKillRadius          = false;
-    [System.NonSerialized] public bool showLines = true;
+    [System.NonSerialized] public bool  showLines               = true;
+    [System.NonSerialized] public bool  instantiated            = false;
     
     public  bool    sunEffect       = false;
-    public  bool    instantiated    = false;
                   
     private List<GameObject>    targets             = new List<GameObject>();
     private List<Vector3>       attractorPoints     = new List<Vector3>();
     private List<Node>          nodesList           = new List<Node>();
 
-    private AttractionPointGenerator    attGen;
+    private int[]       triangles;
+    private Vector3[]   vertices;
+
+    private AttractionPointGenerator attGen;
     private NodeGenerator               nodesGen;
 
     private void OnDrawGizmos()
@@ -97,11 +102,6 @@ public class BranchGenerator : MonoBehaviour
     {
         foreach (var node in nodesList)
         {
-            if (node._mesh != null)
-            {
-                DestroyImmediate(node._mesh);
-                node._mesh = null;
-            }
             DestroyImmediate(holder);
             holder = null;
             instantiated = false;
@@ -110,26 +110,70 @@ public class BranchGenerator : MonoBehaviour
 
     public void GenerateBranches()
     {
-        if (branch != null)
+        mesh.Clear();
+        if (!holder)
         {
-            if (!holder)
-            {
-                holder = new GameObject("Branches");
-                holder.transform.position = this.transform.position;    
-            }
+            holder = new GameObject("Branches");
+            holder.transform.position = this.transform.position;
+            MeshFilter meshf = holder.AddComponent<MeshFilter>();
+            MeshRenderer meshr = holder.AddComponent<MeshRenderer>();
+
+            int points = nodesList[0]._vertices.Length;
+            int ringCount = nodesList.Count;
+
+            vertices = new Vector3[points * ringCount];
+            triangles = new int[6 * points * ringCount];
+
+            // copy vertices from the nodes to one array
             foreach (var node in nodesList)
             {
-                node._mesh = PrefabUtility.InstantiatePrefab(branch) as GameObject;
-                node._mesh.transform.localScale = new Vector3(node._thickness, node._length/2, node._thickness);
-                node._mesh.transform.position = node._pos;
-                if (node._next != null)
-                    node._mesh.transform.rotation = Quaternion.LookRotation((node._pos - node._next._pos).normalized) * Quaternion.Euler(90, 0, 0);
-                node._mesh.transform.parent = holder.transform;
+                for (int j = 0; j < points; j++)
+                {
+                    vertices[node._index * points + j] = node._vertices[j] - this.transform.position;
+                }
             }
+
+            // create triangles
+            int t = 0;
+            foreach (var node in nodesList)
+            {
+                for (int i = 0; i < points; i++)
+                {
+                    if (node._next != null)
+                    {
+                        int nexti = (i + 1) % points; // wrap around the circle, next vertec is always i+1 expect
+                        // if we have gone around the circle we modulate it back to zero
+
+                        int a0 = node._index * points + i;
+                        int a1 = node._index * points + nexti;
+                        int b0 = node._next._index * points + i;
+                        int b1 = node._next._index * points + nexti;
+
+                        // two triangles per quad
+                        triangles[t++] = a0;
+                        triangles[t++] = b0;
+                        triangles[t++] = a1;
+
+                        triangles[t++] = a1;
+                        triangles[t++] = b0;
+                        triangles[t++] = b1;   
+                    }
+                }
+            }
+
+            mesh = new Mesh();
+            mesh.vertices = vertices;
+            mesh.triangles = triangles;
+            meshf.mesh = mesh;
+            if (branchMat != null)
+            {
+                meshr.material = branchMat;
+            }
+            mesh.RecalculateNormals();
+            mesh.RecalculateBounds();
+
             instantiated = true;
         }
-        else
-            Debug.Log("No Branch prefab");
     }
 
     // Automatically updates the AttractorPoints when there are changes done to the attributes.
